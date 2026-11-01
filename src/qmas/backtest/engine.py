@@ -64,24 +64,53 @@ def _tradable(market: SyntheticMarket, strategy: StrategySpec) -> np.ndarray:
 
 
 def _weights(scores: np.ndarray, strategy: StrategySpec) -> np.ndarray:
-    """Equal weights on the top (and bottom) ``quantile`` of the finite scores."""
-    weights = np.zeros(scores.size)
-    valid = np.flatnonzero(np.isfinite(scores))
+    """Equal weights on the top (and bottom) ``quantile`` of the finite scores of each row."""
+    valid = np.isfinite(scores)
+    n_valid = valid.sum(axis=1)
     minimum = 2 if strategy.portfolio == "long_short" else 1
-    if valid.size < minimum:
-        return weights
-    count = max(1, int(np.floor(valid.size * strategy.quantile)))
-    order = valid[np.argsort(scores[valid], kind="stable")]
-    weights[order[-count:]] = 1.0 / count
+    count = np.maximum(1, np.floor(n_valid * strategy.quantile).astype(int))
+    filled = np.where(valid, scores, np.inf)
+    order = np.argsort(filled, axis=1, kind="stable")
+    rank = np.empty_like(order)
+    np.put_along_axis(rank, order, np.arange(scores.shape[1])[None, :], axis=1)
+    enough = (n_valid >= minimum)[:, None]
+    weight = (1.0 / count)[:, None]
+    weights = np.where(enough & valid & (rank >= (n_valid - count)[:, None]), weight, 0.0)
     if strategy.portfolio == "long_short":
-        weights[order[:count]] = -1.0 / count
-    return weights
+        weights = np.where(enough & valid & (rank < count[:, None]), -weight, weights)
+    result: np.ndarray = weights
+    return result
 
 
-def run_backtest(market: SyntheticMarket, strategy: StrategySpec) -> BacktestResult:
-    """Run ``strategy`` on ``market`` and return daily gross and net returns over its window."""
+def _holdings(
+    weights: np.ndarray, entries: np.ndarray, n_days: int, strategy: StrategySpec
+) -> np.ndarray:
+    """Return daily holdings: the sum of the tranches alive on each day (at most ``tranches``)."""
+    held = np.zeros((n_days, weights.shape[1]))
+    if entries.size == 0:
+        return held
+    days = np.arange(n_days)
+    latest = np.searchsorted(entries, days, side="right") - 1
+    share = 1.0 / strategy.tranches
+    for back in range(strategy.tranches):
+        index = latest - back
+        active = (index >= 0) & (days < entries[np.maximum(index, 0)] + strategy.horizon_days)
+        held[active] += weights[index[active]] * share
+    return held
+
+
+def run_backtest(
+    market: SyntheticMarket, strategy: StrategySpec, signal: np.ndarray | None = None
+) -> BacktestResult:
+    """Run ``strategy`` on ``market`` and return daily gross and net returns over its window.
+
+    ``signal`` replaces the registered signal with a precomputed matrix (used by the placebo).
+    """
     first, last = _window_indices(market, strategy)
-    signal = compute_signal(strategy.signal, market, strategy.signal_parameters)
+    if signal is None:
+        signal = compute_signal(strategy.signal, market, strategy.signal_parameters)
+    elif signal.shape != market.returns.shape:
+        raise ValueError("signal must have the shape of the market returns")
     tradable = _tradable(market, strategy)
     source = market.secondary_returns if strategy.price_source == "secondary" else market.returns
     returns = np.nan_to_num(source, nan=0.0)
@@ -91,27 +120,21 @@ def run_backtest(market: SyntheticMarket, strategy: StrategySpec) -> BacktestRes
         else np.full(market.n_assets, strategy.cost_bps)
     ) / BASIS_POINTS
 
-    n_days, n_assets = market.n_days, market.n_assets
-    held = np.zeros((n_days + 1, n_assets))
-    turnover = np.zeros(n_days + 1)
-    costs = np.zeros(n_days + 1)
-    previous = np.zeros((strategy.tranches, n_assets))
-    share = 1.0 / strategy.tranches
-    rebalance_days = range(first + strategy.offset, last - 1, strategy.rebalance_every_days)
-    names = []
-    for number, day in enumerate(rebalance_days):
-        # Decide with the information of the close of ``day``; trade ``execution_delay`` days later.
-        entry = day + 1 + strategy.execution_delay
-        if entry >= last:
-            break
-        weights = _weights(np.where(tradable[day], signal[day], np.nan), strategy)
-        slot = number % strategy.tranches
-        change = np.abs(weights - previous[slot]) * share
-        previous[slot] = weights
-        turnover[entry] += float(change.sum())
-        costs[entry] += float(change @ unit_costs)
-        held[entry : min(entry + strategy.horizon_days, last)] += weights * share
-        names.append(int(np.count_nonzero(weights)))
+    # Decide with the information of the close of each rebalancing day; trade
+    # ``execution_delay`` days later and hold for ``horizon_days``.
+    days = np.arange(first + strategy.offset, last - 1, strategy.rebalance_every_days)
+    entries = days + 1 + strategy.execution_delay
+    days, entries = days[entries < last], entries[entries < last]
+    weights = _weights(np.where(tradable[days], signal[days], np.nan), strategy)
+    previous = np.zeros_like(weights)
+    previous[strategy.tranches :] = weights[: -strategy.tranches or None]
+    change = np.abs(weights - previous) / strategy.tranches
+    turnover = np.zeros(market.n_days)
+    costs = np.zeros(market.n_days)
+    np.add.at(turnover, entries, change.sum(axis=1))
+    np.add.at(costs, entries, change @ unit_costs)
+    held = _holdings(weights, entries, last, strategy)
+    names = np.count_nonzero(weights, axis=1)
 
     window = slice(first, last)
     position_returns = held[window] * returns[window]
@@ -124,6 +147,6 @@ def run_backtest(market: SyntheticMarket, strategy: StrategySpec) -> BacktestRes
         net_returns=net,
         turnover=turnover[window],
         contributions=position_returns.sum(axis=0),
-        n_rebalances=len(names),
-        average_names=float(np.mean(names)) if names else 0.0,
+        n_rebalances=int(names.size),
+        average_names=float(np.mean(names)) if names.size else 0.0,
     )

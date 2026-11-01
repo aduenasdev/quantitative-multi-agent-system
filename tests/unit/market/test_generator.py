@@ -170,3 +170,15 @@ def test_invalid_config_is_rejected(changes: dict[str, object], message: str) ->
 def test_defect_year_outside_the_dates_is_rejected() -> None:
     with pytest.raises(ValueError, match="defect_year"):
         generate_market(replace(SMALL, jump_size=1.0, defect_year=2030), 1)
+
+
+def test_distress_decline_precedes_delistings() -> None:
+    calm = generate_market(replace(MarketConfig(), delisting_rate_annual=0.03), 14)
+    distressed = generate_market(
+        replace(MarketConfig(), delisting_rate_annual=0.03, distress_decline=-0.7), 14
+    )
+    asset = int(np.flatnonzero(distressed.delisting_day >= 0)[0])
+    end = distressed.delisting_day[asset]
+    window = slice(end - distressed.config.distress_days, end)
+    slide = np.log1p(distressed.returns[window, asset]).sum()
+    assert slide < np.log1p(np.nan_to_num(calm.returns[window, asset])).sum() - 0.3

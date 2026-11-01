@@ -67,6 +67,9 @@ class MarketConfig:
     delisting_rate_annual: float = 0.01
     delisting_loser_sensitivity: float = 4.0
     delisting_return: float = -0.30
+    # Log decline spread over the days before a delisting (the slide towards it), 0 for none.
+    distress_decline: float = 0.0
+    distress_days: int = 126
     # Events with New York clock times.
     events_per_year: float = 4.0
     event_reaction_vol: float = 2.0
@@ -265,6 +268,15 @@ def _delistings(config: MarketConfig, returns: np.ndarray, rng: np.random.Genera
     return result
 
 
+def _add_distress(returns: np.ndarray, delisting_day: np.ndarray, config: MarketConfig) -> None:
+    """Spread a total log decline of ``distress_decline`` over the days before each delisting."""
+    daily = np.expm1(config.distress_decline / config.distress_days)
+    for asset in np.flatnonzero(delisting_day >= 0):
+        end = int(delisting_day[asset])
+        start = max(0, end - config.distress_days)
+        returns[start:end, asset] = (1 + returns[start:end, asset]) * (1 + daily) - 1
+
+
 def _top_asset_of_block(characteristic: np.ndarray, alive: np.ndarray, start: int) -> int:
     scores = np.where(alive[start], characteristic[start], -np.inf)
     return int(np.argmax(scores))
@@ -317,6 +329,8 @@ def generate_market(config: MarketConfig, seed: int) -> SyntheticMarket:
         np.arange(n_days)[:, None] < np.where(delisting_day >= 0, delisting_day, n_days)[None, :]
     )
     listed = delisting_day >= 0
+    if config.distress_decline:
+        _add_distress(returns, delisting_day, config)
     returns[delisting_day[listed], np.flatnonzero(listed)] = config.delisting_return
     after = (
         np.arange(n_days)[:, None] > np.where(delisting_day >= 0, delisting_day, n_days)[None, :]
