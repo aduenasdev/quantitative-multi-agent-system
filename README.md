@@ -37,6 +37,8 @@ Every case, the run history and what the red team still gets wrong:
 
 ## How it works
 
+### 1. The agent flow: one thesis through the desk
+
 ```mermaid
 flowchart LR
     T[Thesis YAML] --> R[Orchestrator<br/>pre-register hash]
@@ -60,6 +62,38 @@ flowchart LR
   quotes a number not found in the evidence is replaced by a deterministic one.
 - **Human gate.** The run pauses (and survives a restart) until a person approves or rejects. The
   decision goes to the ledger.
+
+### 2. The red-team flow: from attacks to a verdict
+
+```mermaid
+flowchart TD
+    C[Claimed backtest] --> F{Positive edge?}
+    F -- no --> I[Attacks inconclusive:<br/>nothing to attack]
+    F -- yes --> A[Re-run with one change per attack<br/>delay, point-in-time universe, costs,<br/>trials, placebo, factors, sub-periods,<br/>calendars, top name removed, second source]
+    A --> P1{A fatal attack failed?<br/>A1 A2 A13}
+    P1 -- yes --> B[BROKEN]
+    P1 -- no --> P2{A serious attack failed?<br/>A3-A9}
+    P2 -- yes --> W[WOUNDED]
+    P2 -- no --> P3{Significant?<br/>A10 power}
+    I --> P3
+    P3 -- no --> N[NOT_PROVABLE]
+    P3 -- yes --> S[SURVIVES]
+```
+
+### 3. The evaluation flow: how the red team itself is tested (E1)
+
+```mermaid
+flowchart LR
+    M[Synthetic market<br/>fat tails, delistings,<br/>clock-time events] --> D[10 planted defects<br/>P1-P10]
+    M --> G[5 planted signal strengths<br/>rank IC 0 to 0.08]
+    D --> BT[Full battery<br/>on every case and seed]
+    G --> BT
+    CS[Calibration seeds] -. tune thresholds .-> BT
+    JS[Judgement seeds] --> BT
+    BT --> CM[Confusion matrix]
+    CM --> K{Pre-registered criteria<br/>defects caught, noise rejected,<br/>real signals kept}
+    K --> R[Published report]
+```
 
 The red-team battery, with the textbook methods behind each attack:
 
