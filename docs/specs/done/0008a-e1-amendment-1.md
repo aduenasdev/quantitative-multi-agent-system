@@ -1,6 +1,6 @@
 # Spec 0008a: E1 amendment 1, recalibrate A7 and A8
 
-- **Status**: in-progress
+- **Status**: done
 - **Depends on**: 0008
 - **Blocks**: 0011
 - **Size**: S
@@ -35,10 +35,15 @@ two noisy Sharpe ratios, with thresholds tuned on five calibration seeds per lev
 
 ## 3. Acceptance criteria
 
-- [ ] Thresholds and seeds changed as above; tests updated.
-- [ ] Run 2 executed once on seeds 3000-3004 and published with run 1 in `docs/research/e1-results.md`.
-- [ ] `uv run poe check` passes.
+- [x] Thresholds and seeds changed as above; tests updated.
+- [x] Run 2 executed once on seeds 3000-3004 and published with run 1 in `docs/research/e1-results.md`.
+- [x] `uv run poe check` passes.
 
 ## 4. Out of scope
 
 - Further changes after run 2, whatever its result: they would need amendment 2 and new seeds.
+
+## Post-implementation notes
+
+- Run 2 on judgement seeds 3000-3004 PASSED: defects 46/47, noise 0/5, detectable signals 9/10. One P8
+  case survived. Published in docs/research/e1-run-2.md and summarised in docs/research/e1-results.md.

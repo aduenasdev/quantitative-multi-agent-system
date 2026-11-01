@@ -3,7 +3,8 @@
 > **Run 1, 2026-11-01. Result: FAILED.** Published as it came out. The thresholds of A7 (regime) and A8
 > (calendar) were calibrated on five seeds per level and rejected half of the detectable planted signals
 > on the judgement seeds. Amendment 1 recalibrates them on more calibration seeds and repeats E1 on new
-> judgement seeds; these seeds (2000-2004) are not reused. See [e1-results.md](e1-results.md).
+> judgement seeds; these seeds (2000-2004) are not reused. See [e1-results.md](e1-results.md) and
+> [run 2](e1-run-2.md).
 # E1: battery discrimination
 
 Seeds: 2000, 2001, 2002, 2003, 2004. Placebo runs per case: 200.
