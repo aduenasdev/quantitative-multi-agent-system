@@ -1,5 +1,8 @@
 # Quantitative Multi-Agent System
 
+> The research engine behind **[SoberQuant](https://soberquant.com)**: honest validation of investment
+> strategies, net of costs, with a statistical pass or fail verdict instead of a rosy backtest.
+
 A multi-agent research desk that tries to **break** quantitative trading hypotheses before anyone trusts
 them. A deterministic red team attacks each backtest; language-model agents explain the verdict; a person
 makes the decision; everything is written to a tamper-evident ledger.
