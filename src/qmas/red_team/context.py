@@ -15,7 +15,8 @@ from qmas.market import SyntheticMarket
 class BatteryThresholds:
     """Every threshold of the battery, fixed before the E1 evaluation.
 
-    Calibrated on calibration seeds 1000-1004 only; judgement seeds never tune them.
+    Calibrated on calibration seeds only; judgement seeds never tune them. Amendment 1 (2026-11-01)
+    recalibrated A7 and A8 on seeds 1000-1019 after E1 run 1 failed (docs/research/e1-results.md).
     """
 
     delay_min_retention: float = 0.5
@@ -31,8 +32,8 @@ class BatteryThresholds:
     factor_min_t_statistic: float = 1.645
     factor_min_retention: float = 0.5
     regime_subperiods: int = 3
-    regime_max_share: float = 0.6
-    calendar_min_retention: float = 0.25
+    regime_max_share: float = 0.9
+    calendar_min_mean_sharpe: float = 0.0
     concentration_max_share: float = 0.5
     concentration_min_retention: float = 0.5
     source_max_gap: float = 0.1

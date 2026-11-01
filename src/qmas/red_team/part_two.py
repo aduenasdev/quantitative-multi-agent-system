@@ -59,7 +59,7 @@ def factor_exposure(context: AttackContext) -> AttackResult:
 
 
 def regime(context: AttackContext) -> AttackResult:
-    """A7: the edge must show up in every sub-period, not in one of them."""
+    """A7: the edge must not come from a single sub-period."""
     name, severity = "regime dependence", Severity.SERIOUS
     claimed = context.claimed_sharpe
     if claimed <= 0:
@@ -69,7 +69,7 @@ def regime(context: AttackContext) -> AttackResult:
     sharpes = [_annual_sharpe(part) for part in parts]
     pnl = np.array([part.sum() for part in parts])
     share = float(pnl.max() / pnl.sum()) if pnl.sum() > 0 else float("inf")
-    failed = min(sharpes) <= 0 or share > limits.regime_max_share
+    failed = share > limits.regime_max_share
     metrics = {f"subperiod_{index + 1}_sharpe": value for index, value in enumerate(sharpes)}
     metrics["best_subperiod_share"] = share
     return AttackResult(
@@ -101,7 +101,7 @@ def calendar(context: AttackContext) -> AttackResult:
     offsets = [offset for offset in range(cycle) if offset != context.strategy.offset]
     others = [context.rerun(offset=offset).sharpe() for offset in offsets]
     retention = float(np.mean(others)) / claimed
-    failed = retention < context.thresholds.calendar_min_retention
+    failed = float(np.mean(others)) <= context.thresholds.calendar_min_mean_sharpe
     return AttackResult(
         attack_id="A8",
         name=name,

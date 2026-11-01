@@ -18,8 +18,11 @@ from qmas.backtest import StrategySpec, run_backtest
 from qmas.market import MarketConfig, generate_market
 from qmas.red_team import AttackContext, BatteryThresholds, TrialSet
 
-CALIBRATION_SEEDS: tuple[int, ...] = (1000, 1001, 1002, 1003, 1004)
-JUDGEMENT_SEEDS: tuple[int, ...] = (2000, 2001, 2002, 2003, 2004)
+# Amendment 1 (2026-11-01): calibration widened to 20 seeds; judgement seeds 2000-2004 were used by
+# E1 run 1 and are retired, never reused.
+CALIBRATION_SEEDS: tuple[int, ...] = tuple(range(1000, 1020))
+JUDGEMENT_SEEDS: tuple[int, ...] = (3000, 3001, 3002, 3003, 3004)
+RETIRED_JUDGEMENT_SEEDS: tuple[int, ...] = (2000, 2001, 2002, 2003, 2004)
 DESIGN_START, DESIGN_END = date(2016, 1, 4), date(2021, 12, 31)
 SELECTION_TRIALS = 200
 PLANTED_LEVELS: tuple[float, ...] = (0.0, 0.01, 0.02, 0.04, 0.08)
