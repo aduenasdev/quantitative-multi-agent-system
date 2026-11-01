@@ -52,6 +52,13 @@ class SignalSpec(FrozenModel):
     parameters: dict[str, ParameterValue] = Field(default_factory=dict)
 
 
+class PortfolioSpec(FrozenModel):
+    """How the ranked names become a portfolio."""
+
+    kind: Literal["long_short", "long_only"] = "long_short"
+    quantile: float = Field(default=0.2, gt=0, le=0.5)
+
+
 class Thresholds(FrozenModel):
     """Pre-registered pass thresholds."""
 
@@ -70,6 +77,7 @@ class Thesis(FrozenModel):
     hypothesis: str = Field(min_length=10)
     data: DataSpec
     signal: SignalSpec
+    portfolio: PortfolioSpec = Field(default_factory=PortfolioSpec)
     horizon_days: int = Field(ge=1, le=252)
     rebalance_every_days: int = Field(ge=1, le=252)
     design_window: Window

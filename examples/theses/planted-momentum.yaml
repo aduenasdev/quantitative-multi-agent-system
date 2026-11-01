@@ -16,6 +16,9 @@ data:
 signal:
   name: planted_characteristic
   parameters: {}
+portfolio:
+  kind: long_short
+  quantile: 0.2
 horizon_days: 21
 rebalance_every_days: 21
 design_window:
