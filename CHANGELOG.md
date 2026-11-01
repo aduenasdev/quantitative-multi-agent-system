@@ -14,3 +14,4 @@ All notable changes to this project are documented here. The format follows
 - Statistics core (spec 0002): probabilistic and deflated Sharpe ratio, minimum track record length,
   probability of backtest overfitting (CSCV), block and grouped bootstrap, Benjamini-Hochberg, rank IC,
   Newey-West t statistic and purged k-fold with embargo.
+- Thesis contract and hash-chained ledger (spec 0003): YAML theses with a content hash, tamper-evident ledger, pre-registration rule, `qmas thesis validate` and `qmas ledger verify`.
