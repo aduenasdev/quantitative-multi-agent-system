@@ -18,7 +18,9 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "anthropic==2.3.0",
     "numpy==2.5.4",
+    "openai==3.42.0",
     "pydantic==2.14.2",
     "pydantic-settings==2.16.2",
     "pyyaml==6.0.3",
@@ -64,7 +66,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S603", "S607", "D100", "D101", "D102", "D103", "D104", "PLR2004"]
+"tests/**" = ["S101", "S603", "S607", "D100", "D101", "D102", "D103", "D104", "D107", "PLR2004"]
 "scripts/**" = ["S603", "S607"]
 
 [tool.ruff.lint.pydocstyle]

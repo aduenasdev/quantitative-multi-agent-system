@@ -44,8 +44,13 @@ def test_settings_empty_values_use_defaults(monkeypatch: pytest.MonkeyPatch) -> 
 def test_env_example_lists_every_setting() -> None:
     assert SOURCE_ROOT is not None
     example = (SOURCE_ROOT / ".env.example").read_text(encoding="utf-8")
-    for name in Settings.model_fields:
-        assert f"QMAS_{name.upper()}=" in example
+    for name, field in Settings.model_fields.items():
+        variable = (
+            field.validation_alias.choices[0]  # type: ignore[union-attr]
+            if field.validation_alias is not None
+            else f"QMAS_{name.upper()}"
+        )
+        assert f"{variable}=" in example
 
 
 def test_settings_rejects_invalid_level(monkeypatch: pytest.MonkeyPatch) -> None:
