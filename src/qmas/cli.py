@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
@@ -11,10 +12,22 @@ from pydantic import ValidationError
 from qmas import __version__
 from qmas.config import get_settings
 from qmas.contracts.thesis import load_thesis
+from qmas.evaluation import CALIBRATION_SEEDS, JUDGEMENT_SEEDS, run_e1, write_report
+from qmas.evaluation.e1 import CaseOutcome
 from qmas.ledger import Ledger
 from qmas.logging_setup import configure_logging
+from qmas.red_team import BatteryThresholds
 
 LEDGER_FILE_NAME = "ledger.jsonl"
+QUICK_PLACEBO_RUNS = 50
+
+
+class SeedSplit(StrEnum):
+    """Which seeds an evaluation uses."""
+
+    CALIBRATION = "calibration"
+    JUDGEMENT = "judgement"
+
 
 app = typer.Typer(
     help="Quantitative multi-agent system: red-team trading hypotheses before trusting them.",
@@ -24,9 +37,11 @@ app = typer.Typer(
 config_app = typer.Typer(help="Inspect the configuration.", no_args_is_help=True)
 thesis_app = typer.Typer(help="Work with thesis files.", no_args_is_help=True)
 ledger_app = typer.Typer(help="Inspect the experiment ledger.", no_args_is_help=True)
+evaluate_app = typer.Typer(help="Evaluate the red-team battery.", no_args_is_help=True)
 app.add_typer(config_app, name="config")
 app.add_typer(thesis_app, name="thesis")
 app.add_typer(ledger_app, name="ledger")
+app.add_typer(evaluate_app, name="evaluate")
 
 
 def ledger_path() -> Path:
@@ -78,3 +93,38 @@ def ledger_verify() -> None:
         typer.echo(f"ledger corrupt at line {result.error_line}: {result.reason}", err=True)
         raise typer.Exit(code=1)
     typer.echo(f"ledger ok: {result.n_entries} entries")
+
+
+@evaluate_app.command("e1")
+def evaluate_e1(
+    split: Annotated[
+        SeedSplit, typer.Option(help="Calibration seeds tune; judgement seeds judge.")
+    ] = SeedSplit.JUDGEMENT,
+    quick: Annotated[
+        bool, typer.Option(help="Two seeds and 50 placebos: a smoke run, not a verdict.")
+    ] = False,
+    workers: Annotated[int | None, typer.Option(min=1, help="Parallel processes.")] = None,
+    output: Annotated[Path | None, typer.Option(help="Report directory.")] = None,
+) -> None:
+    """Run E1: every planted defect and signal through the full battery."""
+    seeds = CALIBRATION_SEEDS if split is SeedSplit.CALIBRATION else JUDGEMENT_SEEDS
+    thresholds = BatteryThresholds()
+    if quick:
+        seeds = seeds[:2]
+        thresholds = thresholds.with_overrides(placebo_runs=QUICK_PLACEBO_RUNS)
+
+    def show(outcome: CaseOutcome) -> None:
+        failed = ", ".join(outcome.failed_attacks) or "-"
+        typer.echo(
+            f"{outcome.case_id:>7} seed {outcome.seed}: {outcome.verdict.value:<12} "
+            f"Sharpe {outcome.claimed_sharpe:6.2f}  failed {failed}"
+        )
+
+    report = run_e1(seeds, thresholds, workers=workers, progress=show)
+    name = f"e1-{split.value}{'-quick' if quick else ''}"
+    directory = output or get_settings().data_dir / "reports"
+    json_path, markdown_path = write_report(report, directory, name)
+    for criterion in report.criteria:
+        mark = "pass" if criterion.passed else "FAIL"
+        typer.echo(f"[{mark}] {criterion.name}: {criterion.detail}")
+    typer.echo(f"report: {markdown_path} and {json_path.name}")

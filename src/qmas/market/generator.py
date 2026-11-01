@@ -341,11 +341,13 @@ def generate_market(config: MarketConfig, seed: int) -> SyntheticMarket:
 
     if config.price_error_size:
         block = _defect_block(dates, block_starts, config.defect_year)
-        start = int(block_starts[block])
-        asset = _top_asset_of_block(characteristic, alive, start)
-        day = int(block_starts[block + 1])
-        if not (alive[day, asset] and alive[day + 1, asset]):
-            raise ValueError("price error asset delisted; choose another seed")
+        while True:
+            start = int(block_starts[block])
+            asset = _top_asset_of_block(characteristic, alive, start)
+            day = int(block_starts[block + 1])
+            if alive[day, asset] and alive[day + 1, asset]:
+                break
+            block += 1
         returns[day, asset] = (1 + returns[day, asset]) * (1 + config.price_error_size) - 1
         returns[day + 1, asset] = (1 + returns[day + 1, asset]) / (1 + config.price_error_size) - 1
         defects["price_error"] = (day, asset)

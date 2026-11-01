@@ -9,7 +9,7 @@ from qmas.backtest import run_backtest
 from qmas.contracts.verdict import AttackOutcome, AttackResult, Severity
 from qmas.market.generator import TRADING_DAYS_PER_YEAR
 from qmas.market.signals import compute_signal
-from qmas.red_team.context import AttackContext
+from qmas.red_team.context import AttackContext, BatteryThresholds
 from qmas.stats.overfitting import probability_of_backtest_overfitting
 from qmas.stats.sharpe import (
     deflated_sharpe_ratio,
@@ -19,6 +19,14 @@ from qmas.stats.sharpe import (
 )
 
 ANNUALISATION = float(np.sqrt(TRADING_DAYS_PER_YEAR))
+
+
+def minimum_detectable_sharpe(n_observations: int, thresholds: BatteryThresholds) -> float:
+    """Return the annualised Sharpe ratio detectable with the configured confidence and power."""
+    z = float(
+        stats.norm.ppf(thresholds.min_probabilistic_sharpe) + stats.norm.ppf(thresholds.power)
+    )
+    return float(z / np.sqrt(n_observations - 1) * ANNUALISATION)
 
 
 def no_edge(attack_id: str, name: str, severity: Severity, claimed: float) -> AttackResult:
@@ -216,8 +224,7 @@ def power(context: AttackContext) -> AttackResult:
     psr = probabilistic_sharpe_ratio(
         moments.sharpe_ratio, 0.0, moments.n_observations, moments.skewness, moments.kurtosis
     )
-    z = float(stats.norm.ppf(limits.min_probabilistic_sharpe) + stats.norm.ppf(limits.power))
-    minimum_detectable = z / np.sqrt(moments.n_observations - 1) * ANNUALISATION
+    minimum_detectable = minimum_detectable_sharpe(moments.n_observations, limits)
     metrics = {
         "probabilistic_sharpe": psr,
         "n_observations": float(moments.n_observations),
