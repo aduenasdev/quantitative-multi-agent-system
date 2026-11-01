@@ -1,6 +1,6 @@
 [project]
 name = "qmas"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "A multi-agent research desk that red-teams quantitative trading hypotheses before anyone trusts them."
 readme = "README.md"
 license = "MIT"

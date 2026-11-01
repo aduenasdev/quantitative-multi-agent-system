@@ -1,0 +1,32 @@
+# Production: the slim runtime image, run as one-off jobs. State (ledger, checkpoints, LLM cache,
+# reports) lives in the named volume qmas-data, so it survives container restarts.
+#   docker compose -f compose.prod.yml build
+#   docker compose -f compose.prod.yml run --rm qmas evaluate e1 --quick
+#   docker compose -f compose.prod.yml run --rm qmas thesis run examples/theses/planted-momentum.yaml
+#   docker compose -f compose.prod.yml run --rm qmas thesis approve planted-momentum-v1
+
+name: qmas-prod
+
+services:
+  qmas:
+    build:
+      context: .
+      target: runtime
+    image: qmas:latest
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      QMAS_DATA_DIR: /data
+    volumes:
+      - qmas-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  qmas-data:
