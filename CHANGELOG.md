@@ -11,3 +11,6 @@ All notable changes to this project are documented here. The format follows
 - Repository foundation (spec 0001): packaging with uv, ruff, mypy strict, pytest with coverage, typed
   settings, logging, CLI skeleton, repository check, spec convention, governance rules, ADRs 0001-0004,
   local Docker environment and pre-commit hooks.
+- Statistics core (spec 0002): probabilistic and deflated Sharpe ratio, minimum track record length,
+  probability of backtest overfitting (CSCV), block and grouped bootstrap, Benjamini-Hochberg, rank IC,
+  Newey-West t statistic and purged k-fold with embargo.
