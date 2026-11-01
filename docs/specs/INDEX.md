@@ -17,7 +17,7 @@ Sizes: S < 1 day, M 1-3 days, L > 3 days.
 | 0008 | [E1 evaluation of the battery](done/0008-e1-evaluation.md) | done | M | 0006, 0007 | 0011 |
 | 0008a | [E1 amendment 1: recalibrate A7 and A8](done/0008a-e1-amendment-1.md) | done | S | 0008 | 0011 |
 | 0009 | [LLM layer: providers, cache, prompt registry, number audit](done/0009-llm-layer.md) | done | M | 0001 | 0010 |
-| 0010 | Agent graph with human approval, and CLI | draft | L | 0003, 0006, 0009 | 0011 |
+| 0010 | [Agent graph with human approval, and CLI](done/0010-agent-graph.md) | done | L | 0003, 0006, 0009 | 0011 |
 | 0011 | Delivery: production image, README, architecture and research notes | draft | M | 0008, 0010 | v0.1.0 |
 
 ## After the MVP
