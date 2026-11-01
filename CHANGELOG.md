@@ -18,3 +18,4 @@ All notable changes to this project are documented here. The format follows
 - Synthetic market (spec 0004): factor model with fat tails, delistings, clock-time events, planted characteristic of known rank IC, market-level defect knobs and a signal registry.
 - Backtest engine (spec 0005): overlapping long-short or long-only portfolios with switches for delay, universe, price source, costs, excluded names and rebalancing offset.
 - Red-team battery, part one (spec 0006): verdicts and attacks A1-A5 and A10 with pre-registered thresholds.
+- Red-team battery, part two (spec 0007): attacks A6-A9 and A13, and the full battery.
