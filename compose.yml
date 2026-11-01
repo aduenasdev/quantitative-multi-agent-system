@@ -1,0 +1,24 @@
+# Local development environment.
+#   docker compose build
+#   docker compose run --rm dev poe check        # every check
+#   docker compose run --rm dev qmas --version   # any CLI command
+# The source is bind-mounted, so edits on the host are visible without rebuilding.
+
+name: qmas
+
+services:
+  dev:
+    build:
+      context: .
+      target: dev
+    image: qmas:dev
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      QMAS_DATA_DIR: /app/data
+      # The private denylist path of the host does not exist in the container: skip that step.
+      QMAS_DENYLIST_FILE: ""
+    volumes:
+      - .:/app
+    working_dir: /app
