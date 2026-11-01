@@ -12,7 +12,7 @@ Sizes: S < 1 day, M 1-3 days, L > 3 days.
 | 0003 | [Thesis contract and hash-chained ledger](done/0003-thesis-and-ledger.md) | done | S | 0001 | 0010 |
 | 0004 | [Synthetic market with planted bugs and signals](done/0004-synthetic-market.md) | done | M | 0002 | 0005-0008 |
 | 0005 | [Cross-sectional backtest engine](done/0005-backtest-engine.md) | done | M | 0002, 0004 | 0006, 0007 |
-| 0006 | Red-team battery, part 1: leakage and overfitting | draft | M | 0005 | 0008 |
+| 0006 | [Red-team battery, part 1: leakage and overfitting](done/0006-battery-part-1.md) | done | M | 0005 | 0008 |
 | 0007 | Red-team battery, part 2: robustness | draft | M | 0006 | 0008 |
 | 0008 | E1 evaluation of the battery | draft | M | 0006, 0007 | 0011 |
 | 0009 | LLM layer: providers, cache, prompt registry, number audit | draft | M | 0001 | 0010 |
