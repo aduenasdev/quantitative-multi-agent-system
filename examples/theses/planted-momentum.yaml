@@ -1,0 +1,31 @@
+# A thesis on the synthetic market with a planted signal of known strength.
+# Validate it with:  uv run qmas thesis validate examples/theses/planted-momentum.yaml
+thesis_id: planted-momentum
+version: 1
+family: synthetic-momentum
+title: Planted cross-sectional signal on the synthetic market
+hypothesis: >
+  Stocks with a high value of the planted characteristic earn higher returns over the next
+  21 sessions than stocks with a low value, after costs.
+data:
+  source: synthetic
+  seed: 101
+  parameters:
+    n_assets: 200
+    planted_ic: 0.04
+signal:
+  name: planted_characteristic
+  parameters: {}
+horizon_days: 21
+rebalance_every_days: 21
+design_window:
+  start: 2016-01-04
+  end: 2021-12-31
+holdout_window:
+  start: 2022-01-03
+  end: 2023-12-29
+cost_bps: 10
+thresholds:
+  min_deflated_sharpe: 0.95
+  max_overfitting_probability: 0.5
+  max_p_value: 0.05

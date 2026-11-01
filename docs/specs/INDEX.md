@@ -9,7 +9,7 @@ Sizes: S < 1 day, M 1-3 days, L > 3 days.
 |---|---|---|---|---|---|
 | 0001 | [Repository foundation](done/0001-repository-foundation.md) | done | M | none | all |
 | 0002 | [Statistics core](done/0002-statistics-core.md) | done | M | 0001 | 0005-0008 |
-| 0003 | Thesis contract and hash-chained ledger | draft | S | 0001 | 0010 |
+| 0003 | [Thesis contract and hash-chained ledger](done/0003-thesis-and-ledger.md) | done | S | 0001 | 0010 |
 | 0004 | Synthetic market with planted bugs and signals | draft | M | 0002 | 0005-0008 |
 | 0005 | Cross-sectional backtest engine | draft | M | 0002, 0004 | 0006, 0007 |
 | 0006 | Red-team battery, part 1: leakage and overfitting | draft | M | 0005 | 0008 |
