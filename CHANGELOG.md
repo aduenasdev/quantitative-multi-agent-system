@@ -16,3 +16,4 @@ All notable changes to this project are documented here. The format follows
   Newey-West t statistic and purged k-fold with embargo.
 - Thesis contract and hash-chained ledger (spec 0003): YAML theses with a content hash, tamper-evident ledger, pre-registration rule, `qmas thesis validate` and `qmas ledger verify`.
 - Synthetic market (spec 0004): factor model with fat tails, delistings, clock-time events, planted characteristic of known rank IC, market-level defect knobs and a signal registry.
+- Backtest engine (spec 0005): overlapping long-short or long-only portfolios with switches for delay, universe, price source, costs, excluded names and rebalancing offset.
