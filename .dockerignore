@@ -1,0 +1,19 @@
+# Keep secrets, data and local environments out of the build context.
+.env
+.env.*
+!.env.example
+.git
+.venv
+data
+runs
+models
+**/__pycache__
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+dist
+build
+CLAUDE.md
+.claude

@@ -1,0 +1,114 @@
+[project]
+name = "qmas"
+version = "0.1.0.dev0"
+description = "A multi-agent research desk that red-teams quantitative trading hypotheses before anyone trusts them."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Alejandro Dueñas" }]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Typing :: Typed",
+]
+dependencies = [
+    "pydantic==2.14.2",
+    "pydantic-settings==2.16.2",
+    "typer==0.27.3",
+]
+
+[project.scripts]
+qmas = "qmas.cli:app"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qmas"]
+
+# --------------------------------------------------------------------------- tasks
+[tool.poe.tasks]
+lint = { cmd = "ruff check .", help = "Lint with ruff" }
+format-check = { cmd = "ruff format --check .", help = "Check formatting" }
+format = { cmd = "ruff format .", help = "Format the code" }
+typecheck = { cmd = "mypy", help = "Type check with mypy --strict" }
+test = { cmd = "pytest", help = "Run the tests with coverage" }
+repo-check = { cmd = "python scripts/check_repo.py", help = "English-only, denylist and forbidden files" }
+secrets = { shell = "gitleaks git --redact . && gitleaks dir --redact .", help = "Scan history and tree for secrets (needs gitleaks)" }
+check = { sequence = ["lint", "format-check", "typecheck", "test", "repo-check"], help = "Every check, in order" }
+
+# --------------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "N", "D", "RUF", "PT", "S", "C4", "PL", "NPY", "PD"]
+ignore = [
+    "D203",    # one blank line before class docstring (conflicts with D211)
+    "D213",    # multi-line summary on second line (conflicts with D212)
+    "PLR0913", # too many arguments: statistical functions legitimately take several parameters
+    "PD901",   # generic `df` name is idiomatic in small helpers
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603", "S607", "D100", "D101", "D102", "D103", "D104", "PLR2004"]
+"scripts/**" = ["S603", "S607"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+# --------------------------------------------------------------------------- mypy
+[tool.mypy]
+files = ["src", "tests", "scripts"]
+strict = true
+warn_unreachable = true
+pretty = true
+
+# --------------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--disable-socket",
+    "--cov=qmas",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-fail-under=85",
+]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["qmas"]
+
+# --------------------------------------------------------------------------- repository check
+[tool.check-repo]
+# Words with non-ASCII letters that are allowed anywhere (proper names).
+allowed_words = ["Dueñas"]
+# Files larger than this are rejected (bytes).
+max_file_bytes = 1_000_000
+# Glob patterns that must never be committed.
+forbidden_patterns = ["*.db", "*.sqlite", "*.sqlite3", "*.parquet", "*.pkl", "*.log", ".env", "*.key", "*.pem"]
+# Files skipped by the language check (binary or generated).
+skip_language_check = ["uv.lock", "scripts/check_repo.py", "tests/unit/test_check_repo.py"]
+
+[dependency-groups]
+dev = [
+    "mypy==2.4.1",
+    "poethepoet==0.49.0",
+    "pre-commit==4.7.0",
+    "pytest==9.2.0",
+    "pytest-cov==7.1.0",
+    "pytest-socket==0.8.1",
+    "ruff==0.17.3",
+]
