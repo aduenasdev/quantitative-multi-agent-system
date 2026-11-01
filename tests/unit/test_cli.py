@@ -49,8 +49,8 @@ def test_cli_thesis_validate(tmp_path: Path) -> None:
     example = SOURCE_ROOT / "examples" / "theses" / "planted-momentum.yaml"
     result = runner.invoke(app, ["thesis", "validate", str(example)])
     assert result.exit_code == 0
-    key, digest = result.output.split()
-    assert key == "planted-momentum-v1"
+    printed_name, digest = result.output.split()
+    assert printed_name == "planted-momentum-v1"
     assert len(digest) == 64
     broken = tmp_path / "broken.yaml"
     broken.write_text("thesis_id: Bad Id\n", encoding="utf-8")

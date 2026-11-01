@@ -1,0 +1,2 @@
+# gitleaks false positives (reviewed): a thesis key compared in a test, not a secret.
+0bbe5ac9cfbdfdcbbe66ab00c8945d965a629247:tests/unit/test_cli.py:generic-api-key:53

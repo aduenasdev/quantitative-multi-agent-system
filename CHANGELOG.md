@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-01
+
 ### Added
 
 - Repository foundation (spec 0001): packaging with uv, ruff, mypy strict, pytest with coverage, typed
@@ -24,3 +26,6 @@ All notable changes to this project are documented here. The format follows
   seeds passes every criterion.
 - LLM layer (spec 0009): OpenAI, Anthropic, xAI and OpenAI-compatible providers, simulated mode, exact cache, spending caps, locked prompts and number audit.
 - Agent graph (spec 0010): orchestrator, quant, red team, reporter and human gate in LangGraph, with `qmas thesis run|approve|reject|status`.
+- Delivery (spec 0011): production Docker image and `compose.prod.yml`, complete README, architecture
+  and research notes.
+- Release gate (spec 0011): checks, clean clone, production image, gitleaks and denylist all clean.
