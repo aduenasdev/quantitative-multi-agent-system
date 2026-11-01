@@ -1,6 +1,6 @@
 # Spec 0011: Deliver v0.1.0
 
-- **Status**: in-progress
+- **Status**: done
 - **Depends on**: 0008, 0008a, 0010
 - **Blocks**: v0.1.0
 - **Size**: M
@@ -37,12 +37,12 @@ repository is clean.
 
 ## 6. Acceptance criteria
 
-- [ ] README: what it does, results, architecture, requirements, setup, configuration table, usage with
+- [x] README: what it does, results, architecture, requirements, setup, configuration table, usage with
       example output, Docker local and production, data sources (recommended and free), tests,
       structure, limitations, disclaimer.
-- [ ] `docs/architecture.md`, `docs/research/methodology.md`, `prior-study-catalysts.md`, `roadmap.md`.
-- [ ] Production image builds, runs as non-root, and runs E1 quick and a thesis on a read-only file system.
-- [ ] Release gate: `poe check` locally and in Docker, a clean clone works without `.env`, gitleaks
+- [x] `docs/architecture.md`, `docs/research/methodology.md`, `prior-study-catalysts.md`, `roadmap.md`.
+- [x] Production image builds, runs as non-root, and runs E1 quick and a thesis on a read-only file system.
+- [x] Release gate: `poe check` locally and in Docker, a clean clone works without `.env`, gitleaks
       finds nothing, the private denylist finds nothing, `git ls-files` holds no data or large file.
 
 ## 7. Required tests
@@ -52,3 +52,17 @@ The existing suite; the release gate above is the verification.
 ## 8. Out of scope
 
 - Publishing to a registry; CI (checks run locally by design).
+
+## Post-implementation notes
+
+- Release gate run on 2026-11-01:
+  - `poe check` locally (224 tests) and in the `dev` container;
+  - a clean clone without `.env` syncs and runs;
+  - the runtime image (139 MB of content) runs as uid 10001 on a read-only file system: thesis run,
+    approval and ledger verification work, and quick E1 runs;
+  - gitleaks finds no leaks in the history or the tree, after one reviewed false positive (a thesis
+    key compared in a test);
+  - the private denylist finds nothing; the largest tracked file is `uv.lock` (485 KB).
+- Quick E1 in the production image (calibration seeds 1000-1001, 50 placebos) caught 16 of 18 defect
+  claims: the two misses are P8 cases, the known cost of amendment 1. Quick runs are smoke tests; the
+  verdict is run 2 on judgement seeds.

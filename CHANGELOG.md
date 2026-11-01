@@ -28,3 +28,4 @@ All notable changes to this project are documented here. The format follows
 - Agent graph (spec 0010): orchestrator, quant, red team, reporter and human gate in LangGraph, with `qmas thesis run|approve|reject|status`.
 - Delivery (spec 0011): production Docker image and `compose.prod.yml`, complete README, architecture
   and research notes.
+- Release gate (spec 0011): checks, clean clone, production image, gitleaks and denylist all clean.
