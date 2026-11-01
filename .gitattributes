@@ -1,0 +1,7 @@
+# Normalise line endings: LF in the repository and in every checkout (Windows, Linux, Docker).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
