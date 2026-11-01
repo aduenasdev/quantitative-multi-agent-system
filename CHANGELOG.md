@@ -19,3 +19,4 @@ All notable changes to this project are documented here. The format follows
 - Backtest engine (spec 0005): overlapping long-short or long-only portfolios with switches for delay, universe, price source, costs, excluded names and rebalancing offset.
 - Red-team battery, part one (spec 0006): verdicts and attacks A1-A5 and A10 with pre-registered thresholds.
 - Red-team battery, part two (spec 0007): attacks A6-A9 and A13, and the full battery.
+- E1 evaluation (spec 0008): case library, criteria, report and `qmas evaluate e1`; run 1 published (failed: too strict with real signals).

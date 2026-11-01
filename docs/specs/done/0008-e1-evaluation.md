@@ -1,6 +1,6 @@
 # Spec 0008: Evaluate the battery on planted cases (E1)
 
-- **Status**: in-progress
+- **Status**: done
 - **Depends on**: 0006, 0007
 - **Blocks**: 0011
 - **Size**: M
@@ -44,11 +44,11 @@ criteria written before the run. The result is published as it comes out.
 
 ## 6. Acceptance criteria
 
-- [ ] The case library holds P1-P10 and the five planted levels.
-- [ ] Parallel and serial runs give identical outcomes.
-- [ ] The report renders the criteria, the confusion matrix and every case.
-- [ ] The judgement run is executed once, after the thresholds are merged, and its report is published.
-- [ ] `uv run poe check` passes.
+- [x] The case library holds P1-P10 and the five planted levels.
+- [x] Parallel and serial runs give identical outcomes.
+- [x] The report renders the criteria, the confusion matrix and every case.
+- [x] The judgement run is executed once, after the thresholds are merged, and its report is published.
+- [x] `uv run poe check` passes.
 
 ## 7. Required tests
 
@@ -60,3 +60,11 @@ without positive claims, a subset run with rendering and JSON round trip, serial
 - Known nulls, validated strategies and real bugs on real data (the other half of the evaluation plan):
   they need data that cannot be published.
 - E2 (does the LLM add anything) and E3 (forward): later specs.
+
+## Post-implementation notes
+
+- Run 1 on judgement seeds 2000-2004 FAILED the third criterion: defects 46/46 caught, noise 0/5
+  surviving, detectable signals 5/10 surviving (criterion 80 %). Published in docs/research/e1-run-1.md.
+- Cause: A7 and A8 thresholds tuned on five calibration seeds per level. Amendment 1 (spec 0008a)
+  recalibrates on a larger calibration set and repeats E1 on new judgement seeds.
+- The full run takes about five minutes with seven worker processes.
