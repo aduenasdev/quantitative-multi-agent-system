@@ -81,6 +81,7 @@ def test_a7_catches_a_regime_limited_signal() -> None:
     limited = context(1002, {"planted_ic": 0.08, "signal_active_years": (2020, 2021)})
     attack = part_two.regime(limited)
     assert attack.outcome is AttackOutcome.FAILED
+    assert attack.metrics["best_subperiod_share"] > 0.9
     assert attack.metrics["subperiod_3_sharpe"] > attack.metrics["subperiod_1_sharpe"]
 
 
@@ -88,7 +89,7 @@ def test_a8_catches_a_single_day_signal() -> None:
     front = context(1000, {"planted_ic": 0.08, "signal_front_loaded": True})
     attack = part_two.calendar(front)
     assert attack.outcome is AttackOutcome.FAILED
-    assert attack.metrics["retention"] < 0.25
+    assert attack.metrics["mean_other_offset_sharpe"] <= 0
 
 
 def test_a8_is_inconclusive_for_daily_rebalancing() -> None:
