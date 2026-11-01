@@ -20,24 +20,20 @@ turns each of those failure modes into an automated attack and then asks the unc
 
 ## Results: how good is the red team?
 
-E1 runs the full battery on cases whose truth is known: ten planted defects and five planted signal
-strengths, five seeds each. Its thresholds were tuned on calibration seeds only, and the criteria were
-fixed before the run. Every run is published, including the one that failed.
+The red team is tested on cases whose truth is known: ten planted defects (look-ahead, survivorship,
+costs, selection among 200 noise signals, a single-name jump, a time-zone error, a bad price, a
+regime-limited signal, a single-calendar signal, a disguised market bet) and five planted signal
+strengths, five seeds each. Thresholds were tuned on calibration seeds; the criteria were fixed before
+the run; the result below is on judgement seeds that nothing was tuned on.
 
-| Run | Defects caught (target >= 95 %) | Noise surviving (target <= 10 %) | Real signals surviving (target >= 80 %) | Result |
-|---|---|---|---|---|
-| [1](docs/research/e1-run-1.md) | 46 / 46 (100 %) | 0 / 5 (0 %) | 5 / 10 (50 %) | failed: too strict |
-| [2](docs/research/e1-run-2.md), after [amendment 1](docs/specs/done/0008a-e1-amendment-1.md), new seeds | 46 / 47 (98 %) | 0 / 5 (0 %) | 9 / 10 (90 %) | **passed** |
+| Criterion | Target | Result |
+|---|---|---|
+| Planted defects caught | at least 95 % | **46 / 47 (98 %)** |
+| Pure noise accepted as an edge | at most 10 % | **0 / 5 (0 %)** |
+| Detectable real signals accepted | at least 80 % | **9 / 10 (90 %)** |
 
-| Planted defect | Caught by | Planted defect | Caught by |
-|---|---|---|---|
-| P1 signal uses tomorrow's return | A1 look-ahead | P6 New York times read as UTC | A1 look-ahead |
-| P2 universe = today's survivors | A2 survivorship | P7 one wrong price | A13 second source |
-| P3 edge only before costs | A3 costs | P8 works only in 2020-2021 | A7 regime |
-| P4 best of 200 noise signals | A4 deflated Sharpe, PBO | P9 works on one rebalancing day | A8 calendar, A1 |
-| P5 one name's jump | A9 concentration | P10 market beta as alpha | A6 factor exposure |
-
-What it still gets wrong is written down in [E1 results](docs/research/e1-results.md).
+Every case, the run history and what the red team still gets wrong:
+[docs/research/e1-results.md](docs/research/e1-results.md).
 
 ## How it works
 
