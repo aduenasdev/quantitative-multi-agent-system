@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 from pydantic import ValidationError
 
 from qmas import __version__
+from qmas.agents import IllegalTransitionError, decide, open_desk, start, thread
+from qmas.agents.graph import Decision
 from qmas.config import get_settings
 from qmas.contracts.thesis import load_thesis
 from qmas.evaluation import CALIBRATION_SEEDS, JUDGEMENT_SEEDS, run_e1, write_report
@@ -128,3 +130,82 @@ def evaluate_e1(
         mark = "pass" if criterion.passed else "FAIL"
         typer.echo(f"[{mark}] {criterion.name}: {criterion.detail}")
     typer.echo(f"report: {markdown_path} and {json_path.name}")
+
+
+def _thresholds(quick: bool) -> BatteryThresholds:
+    thresholds = BatteryThresholds()
+    if quick:
+        thresholds = thresholds.with_overrides(placebo_runs=QUICK_PLACEBO_RUNS)
+    return thresholds
+
+
+def _show_pause(result: dict[str, Any]) -> None:
+    pause = result["__interrupt__"][0].value
+    typer.echo(f"verdict: {pause['verdict']}")
+    typer.echo("")
+    typer.echo(pause["memo"])
+    typer.echo("")
+    key = pause["key"]
+    typer.echo(f"awaiting a decision: qmas thesis approve {key} | qmas thesis reject {key}")
+
+
+@thesis_app.command("run")
+def thesis_run(
+    path: Annotated[Path, typer.Argument(exists=True, dir_okay=False, help="Thesis YAML file.")],
+    quick: Annotated[bool, typer.Option(help="50 placebos instead of 200.")] = False,
+) -> None:
+    """Register, backtest and red-team a thesis, then stop for a human decision."""
+    thesis = load_thesis(path)
+    with open_desk(get_settings(), _thresholds(quick)) as graph:
+        if graph.get_state(thread(thesis.key)).values:
+            typer.echo(f"{thesis.key} was already run; a new test needs a new version", err=True)
+            raise typer.Exit(code=1)
+        typer.echo(f"{thesis.key}: registering, backtesting and running the red team...")
+        _show_pause(start(graph, thesis))
+
+
+def _decide(key: str, decision: Decision, note: str) -> None:
+    with open_desk(get_settings(), _thresholds(quick=False)) as graph:
+        try:
+            result = decide(graph, key, decision, note)
+        except IllegalTransitionError as error:
+            typer.echo(str(error), err=True)
+            raise typer.Exit(code=1) from error
+    verdict = result["report"]["verdict"]
+    typer.echo(f"{key}: {result['decision']} (verdict {verdict}), recorded in the ledger")
+
+
+@thesis_app.command("approve")
+def thesis_approve(
+    key: Annotated[str, typer.Argument(help="Thesis key, e.g. planted-momentum-v1.")],
+    note: Annotated[str, typer.Option(help="Reason for the decision.")] = "",
+) -> None:
+    """Approve a thesis waiting at the human gate."""
+    _decide(key, "approved", note)
+
+
+@thesis_app.command("reject")
+def thesis_reject(
+    key: Annotated[str, typer.Argument(help="Thesis key, e.g. planted-momentum-v1.")],
+    note: Annotated[str, typer.Option(help="Reason for the decision.")] = "",
+) -> None:
+    """Reject a thesis waiting at the human gate."""
+    _decide(key, "rejected", note)
+
+
+@thesis_app.command("status")
+def thesis_status(
+    key: Annotated[str, typer.Argument(help="Thesis key, e.g. planted-momentum-v1.")],
+) -> None:
+    """Show where a thesis is in the desk."""
+    with open_desk(get_settings(), _thresholds(quick=False)) as graph:
+        snapshot = graph.get_state(thread(key))
+    if not snapshot.values:
+        typer.echo(f"{key}: unknown", err=True)
+        raise typer.Exit(code=1)
+    values = snapshot.values
+    verdict = values.get("report", {}).get("verdict", "-")
+    waiting = ", ".join(snapshot.next) or "nothing"
+    typer.echo(f"{key}: stage {values.get('stage')}, verdict {verdict}, waiting for {waiting}")
+    if values.get("decision"):
+        typer.echo(f"decision: {values['decision']} {values.get('reviewer_note', '')}".rstrip())
